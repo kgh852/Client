@@ -1,1 +1,1 @@
-# Weesh Teacher App
+# Weesh Client
