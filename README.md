@@ -32,7 +32,7 @@ To solve these issues, **Weesh provides:**
 
 ### 👨‍🎓 Student
 
-- Sign up / Login
+- Login
 - View counseling reservations
 - Create counseling reservations
 - Modify reservations
@@ -55,6 +55,11 @@ To solve these issues, **Weesh provides:**
 - **React**
 - **CSS Modules**
 - **Axios**
+
+### Backend
+
+- REST API Server
+- JWT Authentication
 
 ---
 
