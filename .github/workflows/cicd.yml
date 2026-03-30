@@ -16,6 +16,8 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       packages: write
+    outputs:
+      owner: ${{ steps.lower.outputs.owner }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
@@ -30,12 +32,16 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: Repository owner lowercase
+        id: lower
+        run: echo "owner=$(echo '${{ github.repository_owner }}' | tr '[:upper:]' '[:lower:]')" >> $GITHUB_OUTPUT
+
       - name: Build and Push Docker
         uses: docker/build-push-action@v4
         with:
           context: .
           push: true
-          tags: ghcr.io/${{ github.repository_owner }}/weesh-client:latest
+          tags: ghcr.io/${{ steps.lower.outputs.owner }}/weesh-client:latest
           build-args: |
             SPRING_BOOT_API_URL=${{ secrets.SPRING_BOOT_API_URL }}
           cache-from: type=gha
@@ -53,8 +59,8 @@ jobs:
       - name: Deploy to EC2
         run: |
           ssh -o StrictHostKeyChecking=no ec2-user@${{ secrets.EC2_HOST }} << 'EOF'
-            docker pull ghcr.io/${{ github.repository_owner }}/weesh-client:latest
+            docker pull ghcr.io/${{ needs.build-and-push.outputs.owner }}/weesh-client:latest
             docker stop weesh-client || true
             docker rm weesh-client || true
-            docker run --network weesh-net -d --name weesh-client -p 80:3000 ghcr.io/${{ github.repository_owner }}/weesh-client:latest
+            docker run --network weesh-net -d --name weesh-client -p 80:3000 ghcr.io/${{ needs.build-and-push.outputs.owner }}/weesh-client:latest
           EOF
